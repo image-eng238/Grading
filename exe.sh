@@ -85,7 +85,7 @@ fi
 if [ ! -d data ]; then
     mkdir data
 fi
-if [! -d log ]; then
+if [ ! -d log ]; then
     mkdir log
 fi
 
