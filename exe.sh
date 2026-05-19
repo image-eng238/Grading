@@ -18,6 +18,7 @@ function help() {
     echo -e "-f, --file <ファイル名> 結果を保存するファイル"
     echo -e "-h, --help ヘルプを表示して終了"
     echo -e "-p, --pipeline <入力> テストするプログラムでに渡す標準入力"
+    echo -e "-t, ワークスペースに使う tmux の pane の番号"
     echo -e "-z, --zip <zipファイル> テストするソースコードが保存されているzipファイル"
 }
 
@@ -31,18 +32,20 @@ function timeout() {
         kill -s KILL $!
         wait $!
         return $pre
-    } 2> /dev/null
+    }
 }
 
 function execute() {
     echo -e "実行中..."
+    > $tmp_file
     echo -e "$pipe" | ./bin/$bin_file $argument > $tmp_file
-    cat $tmp_file >> $out_file
+    cat $tmp_file > $out_file
 }
 
 argument=""
 pipe=""
 out_file="./log/result.log"
+t_pane=""
 zip_file=""
 tmp_file=$(mktemp /tmp/exe-XXX.txt||echo テンポラリファイルの作成に失敗しました;exit 1)
 trap "rm -f ${tmp_file}" EXIT
@@ -65,6 +68,10 @@ while [ "$#" -gt 0 ]; do
         -p | --pipeline)
             shift
             pipe="${1}"
+        ;;
+        -t)
+            shift
+            t_pane=${1}
         ;;
         -z | --zip)
             shift
@@ -105,20 +112,34 @@ echo -e "引数: \"$argument\"\n標準入力: \"$pipe\"\n" | tee $out_file
 # ビルドとテスト
 for s_file in "${c_source_files[@]}"; do
     echo "$s_file をビルド中..."
+
+    out_file=log/$(echo $s_file | sed 's/\.c/\.log/')
+    > out_file
     echo "> $s_file" >> $out_file
 
-    bin_file=$(echo $s_file | sed 's/.c//')
+    bin_file=$(echo $s_file | sed 's/\.c//')
 
     if gcc -g ./data/$s_file -o ./bin/$bin_file; then
         echo "> ビルド成功" | tee -a $out_file
         if [ "$pipe" ]; then
             # 標準入力を渡す場合，タイムアウトを指定
             echo -e "" >> $out_file
-            if timeout 1 execute; then
-                echo -e "" >> $out_file
-            else
-                echo -e "実行時間が長すぎるため，手動でテストしてください\n" >> $out_file
-            fi
+            echo -e "実行中..."
+            > $tmp_file
+            # echo -e "$pipe" | ./bin/$bin_file $argument > $tmp_file
+            # cat $tmp_file > $out_file
+            tmux send-key -t $t_pane -- "./bin/$bin_file $argument > $out_file" Enter
+            sleep 0.5
+            tmux send-key -t $t_pane -- "$pipe" Enter
+            sleep 0.1
+            tmux send-key -t $t_pane -- ^C
+            sleep 1
+
+            # if timeout 1 execute; then
+            #     echo -e "" > $out_file
+            # else
+            #     echo -e "実行時間が長すぎるため，手動でテストしてください\n" > $out_file
+            # fi
             echo -e "> 終了"
         else
             # 標準入力を指定しない場合，scriptコマンドで手動で入力できるようにする
