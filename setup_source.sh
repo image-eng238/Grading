@@ -1,18 +1,17 @@
 #!/bin/bash
 
-cd data
-rm $(ls | grep -v '.c') 2> /dev/null
-cd ..
+cd ${1:-.}
+rm $(ls | grep -v '.c$') 2> /dev/null
 
-files=($(ls ./data/))
+files=($(ls))
 
 for f in "${files[@]}"; do
-	echo $f
-	mv ./data/$f \
-	./data/$( \
+	#echo $f
+	mv -v $f $( \
 		echo $f \
-		| grep -oE '(_258[0-9]*_)|(re.*\.c)' \
+		| grep -oE '(_2[0-9]{5}_)|(re.*\.c)' \
 		| tr -d _ \
 		| paste -s -d '-' \
 	) 2> /dev/null
 done
+

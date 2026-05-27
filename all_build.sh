@@ -1,12 +1,28 @@
 #!/bin/bash
+bin_dir='.'
+source_dir='.'
 
-c_source_files=($(ls ./data/))
+while getopts s:b: opt; do
+	case $opt in
+	s)
+	source_dir=$OPTARG
+	;;
+	b)
+	bin_dir=$OPTARG
+	;;
+	*)
+	exit 1
+	;;
+	esac
+done
+
+c_source_files=($(ls $source_dir))
 
 for sfile in "${c_source_files[@]}"; do
 	echo "> building $sfile"
 	gcc \
-		-g ./data/$sfile \
-		-o ./bin/$(echo $sfile | tr -d .c)
+		-g $source_dir/$sfile \
+		-o $bin_dir/$(echo $sfile | tr -d .c)
 
 	if [ ${?} -eq 0 ]; then
 		echo "> success"
