@@ -1,25 +1,8 @@
 #!/bin/bash
 
-if [ -d data ]; then
-	cd data
-	rm -rf *
-	cd ..
-else
-	mkdir data
-fi
+mkdir data
 
-if [ -d bin ]; then
-	cd bin
-	rm -rf *
-	cd ..
-else
-	mkdir bin
-fi
+mkdir bin
 
-if [ -d log ]; then
-	cd log
-	rm -rf *
-	cd ..
-else
-	mkdir log
-fi
+mkdir log
+
