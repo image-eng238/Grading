@@ -1,12 +1,18 @@
 #!/bin/bash
 
+which tmux > /dev/null
+if [ $? -ne 0 ]; then
+	echo This script requires tmux to run
+	exit 1
+fi
+
 bin_dir='.'
 out_dir='.'
 work_pane='1'
 work_pipe=''
 work_args=''
 
-while getopts a:b:o:t:p: opt; do
+while getopts a:b:o:t:p:h opt; do
 	case $opt in
 	a)
 	work_args=$OPTARG
@@ -23,11 +29,23 @@ while getopts a:b:o:t:p: opt; do
 	p)
 	work_pipe=$OPTARG
 	;;
+	h)
+	echo -a argument
+	echo -b binary directory
+	echo -o output directory
+	echo -p send pipeline
+	echo -t number of workspace pine
+	echo -h show this
+	exit 0
+	;;
 	*)
 	exit 1
 	;;
 	esac
 done
+
+bin_dir=$(realpath $bin_dir)
+out_dir=$(realpath $out_dir)
 
 bin_files=($(ls $bin_dir))
 
