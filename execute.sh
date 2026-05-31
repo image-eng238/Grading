@@ -51,7 +51,7 @@ bin_files=($(ls $bin_dir))
 
 for bin in "${bin_files[@]}"; do
 	echo $bin is runnig...
-	echo $bin > $out_dir/$bin.log
+	echo $bin_dir/$bin > $out_dir/$bin.log
 	tmux send-key -t $work_pane \
 	-- "$bin_dir/$bin $work_args >> $out_dir/$bin.log" \
 	Enter
@@ -75,5 +75,6 @@ for bin in "${bin_files[@]}"; do
 	else
 		echo "> success" | tee -a $out_dir/$bin.log
 	fi
+	echo >> $out_dir/$bin.log
 done
 
