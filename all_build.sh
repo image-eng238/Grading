@@ -2,13 +2,19 @@
 bin_dir='.'
 source_dir='.'
 
-while getopts s:b: opt; do
+while getopts s:b:h opt; do
 	case $opt in
 	s)
 	source_dir=$OPTARG
 	;;
 	b)
 	bin_dir=$OPTARG
+	;;
+	h)
+	echo -b binary directory
+	echo -s source file directory
+	echo -h show this
+	exit 0
 	;;
 	*)
 	exit 1
